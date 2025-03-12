@@ -9,10 +9,15 @@ import {
   Slider,
   Grid,
   Divider,
-  Alert
+  Alert,
+  Chip
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import { predictFraud } from '../api/fraudApi';
+import WarningIcon from '@mui/icons-material/Warning';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import InfoIcon from '@mui/icons-material/Info';
+import React from 'react';
 
 // Sample feature names - replace with your actual model features
 const featureNames = [
@@ -43,6 +48,12 @@ const featureRanges: Record<FeatureName, { min: number; max: number; step: numbe
   'account_age_days': { min: 1, max: 3650, step: 1 }
 };
 
+const getRiskLevel = (probability: number) => {
+  if (probability > 0.7) return { level: 'High Risk', color: '#d32f2f', icon: WarningIcon };
+  if (probability > 0.3) return { level: 'Medium Risk', color: '#ed6c02', icon: InfoIcon };
+  return { level: 'Low Risk', color: '#2e7d32', icon: CheckCircleIcon };
+};
+
 export const PredictionForm: FC = () => {
   const [features, setFeatures] = useState<Record<FeatureName, number>>(defaultValues);
   const [loading, setLoading] = useState(false);
@@ -63,6 +74,7 @@ export const PredictionForm: FC = () => {
   const handleSubmit = async () => {
     setLoading(true);
     setError(null);
+    setResult(null);
     
     try {
       // Convert features object to array in the correct order
@@ -79,22 +91,19 @@ export const PredictionForm: FC = () => {
 
   const getResultColor = () => {
     if (!result) return '#1976d2';
-    return result.fraudProbability > 0.7 
-      ? '#d32f2f' 
-      : result.fraudProbability > 0.3 
-        ? '#ed6c02' 
-        : '#2e7d32';
+    return getRiskLevel(result.fraudProbability).color;
   };
 
   return (
     <Paper
       sx={{
         p: 3,
-        height: '100%',
+        height: 'auto',
+        minHeight: '100%',
         background: 'white',
         borderRadius: 2,
         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
-        overflow: 'hidden'
+        overflow: 'visible'
       }}
     >
       <Typography variant="h6" gutterBottom sx={{ color: '#1a365d', fontWeight: 600 }}>
@@ -177,7 +186,10 @@ export const PredictionForm: FC = () => {
               justifyContent: 'center',
               height: '100%',
               pl: { xs: 0, md: 3 },
-              pt: { xs: 3, md: 0 }
+              pt: { xs: 3, md: 0 },
+              pb: { xs: 3, md: 0 },
+              position: 'relative',
+              overflow: 'hidden'
             }}
           >
             {result ? (
@@ -185,13 +197,18 @@ export const PredictionForm: FC = () => {
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 15 }}
-                style={{ width: '100%', textAlign: 'center' }}
+                style={{ 
+                  width: '100%', 
+                  textAlign: 'center',
+                  maxHeight: '100%',
+                  overflowY: 'auto'
+                }}
               >
                 <Box 
                   sx={{ 
                     position: 'relative', 
-                    width: 200, 
-                    height: 200, 
+                    width: { xs: 160, sm: 200 },
+                    height: { xs: 160, sm: 200 },
                     margin: '0 auto',
                     mb: 2
                   }}
@@ -199,14 +216,14 @@ export const PredictionForm: FC = () => {
                   <CircularProgress
                     variant="determinate"
                     value={100}
-                    size={200}
+                    size="100%"
                     thickness={4}
                     sx={{ color: '#e0e0e0', position: 'absolute' }}
                   />
                   <CircularProgress
                     variant="determinate"
                     value={result.fraudProbability * 100}
-                    size={200}
+                    size="100%"
                     thickness={4}
                     sx={{ 
                       color: getResultColor(),
@@ -227,39 +244,85 @@ export const PredictionForm: FC = () => {
                       justifyContent: 'center',
                     }}
                   >
-                    <Typography variant="h4" sx={{ fontWeight: 700, color: getResultColor() }}>
+                    <Typography 
+                      variant="h4" 
+                      sx={{ 
+                        fontWeight: 700, 
+                        color: getResultColor(),
+                        fontSize: { xs: '1.5rem', sm: '2rem' }
+                      }}
+                    >
                       {Math.round(result.fraudProbability * 100)}%
                     </Typography>
-                    <Typography variant="body2" sx={{ color: '#4a5568' }}>
+                    <Typography 
+                      variant="body2" 
+                      sx={{ 
+                        color: '#4a5568',
+                        fontSize: { xs: '0.8rem', sm: '0.875rem' }
+                      }}
+                    >
                       Fraud Risk
                     </Typography>
                   </Box>
                 </Box>
 
-                <Typography 
-                  variant="h6" 
+                <Box sx={{ mb: 2 }}>
+                  <Chip
+                    icon={React.createElement(getRiskLevel(result.fraudProbability).icon)}
+                    label={getRiskLevel(result.fraudProbability).level}
+                    sx={{
+                      bgcolor: `${getResultColor()}15`,
+                      color: getResultColor(),
+                      fontWeight: 600,
+                      fontSize: { xs: '0.875rem', sm: '1rem' }
+                    }}
+                  />
+                </Box>
+
+                <Box 
                   sx={{ 
-                    fontWeight: 600, 
-                    color: getResultColor(),
-                    mb: 1
+                    mt: 2, 
+                    p: 2, 
+                    bgcolor: '#f8fafc', 
+                    borderRadius: 2,
+                    mx: 'auto',
+                    maxWidth: '100%'
                   }}
                 >
-                  {result.isAlert ? 'High Risk Transaction' : 'Low Risk Transaction'}
-                </Typography>
-                
-                <Typography variant="body2" sx={{ color: '#4a5568' }}>
-                  Confidence: {Math.round(result.confidence * 100)}%
-                </Typography>
+                  <Typography variant="body2" sx={{ color: '#4a5568', mb: 1, fontWeight: 600 }}>
+                    Risk Factors:
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#4a5568', mb: 1 }}>
+                    • Transaction Amount: ${features.transaction_amount}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#4a5568', mb: 1 }}>
+                    • Time: {features.hour_of_day}:00
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#4a5568', mb: 1 }}>
+                    • Day: {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][features.day_of_week]}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#4a5568' }}>
+                    • Account Age: {features.account_age_days} days
+                  </Typography>
+                </Box>
+
+                <Box sx={{ mt: 2 }}>
+                  <Typography 
+                    variant="body2" 
+                    sx={{ 
+                      color: '#4a5568', 
+                      fontWeight: 600,
+                      fontSize: { xs: '0.875rem', sm: '1rem' }
+                    }}
+                  >
+                    Confidence Score: {Math.round(result.confidence * 100)}%
+                  </Typography>
+                </Box>
               </motion.div>
             ) : (
-              <Box sx={{ textAlign: 'center', color: '#718096' }}>
-                <Typography variant="body1" sx={{ mb: 1, fontWeight: 500 }}>
-                  No prediction yet
-                </Typography>
-                <Typography variant="body2">
-                  Adjust the sliders and click "Predict" to see the fraud risk assessment
-                </Typography>
-              </Box>
+              <Typography variant="body2" sx={{ color: '#4a5568', textAlign: 'center' }}>
+                Adjust the sliders and click "Predict Fraud Risk" to get a risk assessment
+              </Typography>
             )}
           </Box>
         </Grid>

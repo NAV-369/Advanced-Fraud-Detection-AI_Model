@@ -263,3 +263,144 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - SHAP library for model explainability
 - LightGBM for high-performance gradient boosting
 - React and Material-UI for the frontend implementation
+
+# Fraud Detection Dashboard
+
+A real-time fraud detection dashboard built with React and Flask, providing interactive visualizations and insights for transaction monitoring and fraud analysis.
+
+## Features
+
+- **Real-time Transaction Monitoring**
+  - View key metrics including total transactions, fraud rate, and average transaction value
+  - Interactive time series visualization of fraud patterns
+  - Transaction table with detailed information and fraud probability scores
+
+- **Interactive Visualizations**
+  - Radar chart showing fraud patterns by day of the week
+  - Stacked bar chart displaying fraud distribution across time blocks
+  - Heat map visualization of transaction patterns
+
+- **Fraud Prediction**
+  - Real-time fraud probability assessment for new transactions
+  - Input form for transaction details
+  - Instant feedback on transaction risk level
+
+## Technology Stack
+
+- **Frontend**
+  - React with TypeScript
+  - Material-UI for component styling
+  - Nivo for data visualizations
+  - Axios for API communication
+
+- **Backend**
+  - Flask API server
+  - Scikit-learn for machine learning model
+  - Pandas for data processing
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v14 or higher)
+- Python 3.8+
+- pip (Python package manager)
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone [repository-url]
+   cd fraud-detection
+   ```
+
+2. Set up the frontend:
+   ```bash
+   cd fraud-dashboard
+   npm install
+   ```
+
+3. Set up the backend:
+   ```bash
+   cd ../api
+   pip install -r requirements.txt
+   ```
+
+### Running the Application
+
+1. Start the Flask API server:
+   ```bash
+   cd api
+   python app.py
+   ```
+   The API will be available at `http://localhost:5000`
+
+2. Start the React development server:
+   ```bash
+   cd fraud-dashboard
+   npm run dev
+   ```
+   The dashboard will be available at `http://localhost:5173`
+
+## Using the Dashboard
+
+### Main Dashboard
+
+The main dashboard displays:
+- Key performance metrics at the top
+- Fraud activity visualization (switchable between daily patterns and time block distribution)
+- Transaction table showing recent transactions
+- Prediction form for assessing new transactions
+
+### Making Predictions
+
+To assess a new transaction:
+1. Navigate to the prediction form
+2. Enter the transaction details:
+   - Transaction amount
+   - Merchant category
+   - Time of day
+   - Additional relevant features
+3. Submit the form to receive a fraud probability score
+
+### Interpreting Visualizations
+
+- **Radar Chart**: Shows fraud patterns across days of the week, helping identify high-risk periods
+- **Stacked Bar Chart**: Displays fraud distribution across time blocks (morning, afternoon, evening, night)
+- **Transaction Table**: Lists recent transactions with details and fraud probability scores
+
+## Development
+
+### Project Structure
+
+```
+fraud-detection/
+├── api/                 # Flask backend
+│   ├── app.py          # Main API server
+│   ├── model/          # ML model files
+│   └── requirements.txt
+└── fraud-dashboard/    # React frontend
+    ├── src/
+    │   ├── components/ # React components
+    │   ├── api/        # API services
+    │   └── types/      # TypeScript definitions
+    └── package.json
+```
+
+### API Endpoints
+
+- `GET /api/metrics` - Retrieve dashboard metrics
+- `GET /api/transactions` - Get recent transactions
+- `POST /api/predict` - Submit transaction for fraud prediction
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
