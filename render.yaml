@@ -3,28 +3,18 @@ services:
   - type: web
     name: fraud-detection-api
     env: python
-    region: ohio
-    plan: free
-    rootDir: api
-    buildCommand: pip install -r requirements.txt
-    startCommand: python -m gunicorn serve_model:app --bind 0.0.0.0:$PORT
+    buildCommand: cd api && pip install -r requirements.txt
+    startCommand: cd api && gunicorn app:app
     envVars:
       - key: PYTHON_VERSION
         value: 3.9.18
       - key: FLASK_ENV
         value: production
-      - key: PYTHON_MODULE
-        value: serve_model:app
-      - key: PORT
-        value: 10000
-    healthCheckPath: /health
 
   # Frontend Static Site
   - type: static
     name: fraud-detection-frontend
     env: node
-    region: ohio
-    plan: free
     buildCommand: cd fraud-dashboard && npm install && npm run build
     staticPublishPath: ./fraud-dashboard/dist
     envVars:
