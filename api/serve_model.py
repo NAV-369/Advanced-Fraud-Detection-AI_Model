@@ -13,8 +13,8 @@ import os
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app, resources={
-    r"/api/*": {
-        "origins": ["http://localhost:3000", "http://127.0.0.1:3000", "http://frontend:3000"],
+    r"/*": {
+        "origins": ["http://localhost:3000", "https://fraud-detection-frontend.onrender.com"],
         "methods": ["GET", "POST", "OPTIONS"],
         "allow_headers": ["Content-Type"]
     }
@@ -27,9 +27,24 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
+# Always use mock predictions in production for demo
+USE_MOCK_PREDICTIONS = True
+
+@app.route('/')
+def home():
+    """Home endpoint"""
+    return jsonify({
+        "status": "online",
+        "message": "Fraud Detection API is running",
+        "endpoints": {
+            "health": "/health",
+            "metrics": "/metrics",
+            "predict": "/predict"
+        }
+    })
+
 # Load model
 MODEL_PATH = Path('./model/best_model_LightGBM_20250310_193850.joblib')
-USE_MOCK_PREDICTIONS = True  # Set to False when model is ready
 
 try:
     if not USE_MOCK_PREDICTIONS:
@@ -107,7 +122,16 @@ def generate_demo_metrics():
         "fraudHeatmap": heatmap_data
     }
 
-@app.route('/api/metrics', methods=['GET'])
+@app.route('/health')
+def health():
+    """Health check endpoint"""
+    return jsonify({
+        "status": "healthy",
+        "using_mock_predictions": USE_MOCK_PREDICTIONS,
+        "timestamp": datetime.now().isoformat()
+    })
+
+@app.route('/metrics', methods=['GET'])
 def get_metrics():
     """Endpoint for fraud metrics dashboard"""
     try:
@@ -117,7 +141,7 @@ def get_metrics():
         logging.error(f"Metrics error: {str(e)}")
         return jsonify({"error": "Internal server error"}), 500
 
-@app.route('/api/predict', methods=['POST'])
+@app.route('/predict', methods=['POST'])
 def predict():
     """Endpoint for fraud predictions"""
     try:
@@ -176,15 +200,6 @@ def predict():
         logging.error(f"Prediction error: {str(e)}")
         return jsonify({"error": "Internal server error"}), 500
 
-@app.route('/api/health', methods=['GET'])
-def health_check():
-    """Health check endpoint"""
-    return jsonify({
-        "status": "healthy",
-        "using_mock_predictions": USE_MOCK_PREDICTIONS,
-        "model_loaded": not USE_MOCK_PREDICTIONS,
-        "timestamp": datetime.now().isoformat()
-    })
-
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5001)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
