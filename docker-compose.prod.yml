@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./fraud-dashboard
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: always
+    environment:
+      - NODE_ENV=production
+
+  backend:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    expose:
+      - "5000"
+    volumes:
+      - ./api/best_model_LightGBM_20250310_193850.joblib:/app/best_model_LightGBM_20250310_193850.joblib
+    environment:
+      - FLASK_ENV=production
+      - PYTHONUNBUFFERED=1
+    restart: always 

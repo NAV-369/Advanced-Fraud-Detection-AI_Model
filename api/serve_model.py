@@ -8,10 +8,17 @@ import logging
 from pathlib import Path
 from datetime import datetime, timedelta
 import random  # Only for demo data, remove in production
+import os
 
 # Initialize Flask app
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+CORS(app, resources={
+    r"/api/*": {
+        "origins": ["http://localhost:3000", "http://127.0.0.1:3000", "http://frontend:3000"],
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type"]
+    }
+})
 
 # Configure logging
 logging.basicConfig(
@@ -180,4 +187,4 @@ def health_check():
     })
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5001)

@@ -198,17 +198,17 @@ export const PredictionForm: FC = () => {
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 15 }}
                 style={{ 
-                  width: '100%', 
+                  width: '180%', 
                   textAlign: 'center',
-                  maxHeight: '100%',
+                  maxHeight: '120%',
                   overflowY: 'auto'
                 }}
               >
                 <Box 
                   sx={{ 
                     position: 'relative', 
-                    width: { xs: 160, sm: 200 },
-                    height: { xs: 160, sm: 200 },
+                    width: { xs: 140, sm: 150 },
+                    height: { xs: 160, sm: 150 },
                     margin: '0 auto',
                     mb: 2
                   }}

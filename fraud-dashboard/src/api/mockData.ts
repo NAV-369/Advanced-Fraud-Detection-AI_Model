@@ -33,14 +33,16 @@ const generateFraudValue = (hour: number, day: number): number => {
 // Generate heatmap data with proper structure for visualization
 const generateHeatmapData = () => {
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-  return days.map((day, dayIndex) => ({
-    id: day,
-    data: Array.from({ length: 24 }, (_, hour) => ({
-      x: hour,
-      y: dayIndex,
-      value: generateFraudValue(hour, dayIndex)
-    }))
-  }));
+  return [{
+    id: 'fraud-heatmap',
+    data: days.flatMap((_, dayIndex) => 
+      Array.from({ length: 24 }, (_, hour) => ({
+        x: hour,
+        y: dayIndex,
+        value: generateFraudValue(hour, dayIndex)
+      }))
+    )
+  }];
 };
 
 export const mockFraudMetrics: FraudMetrics = {

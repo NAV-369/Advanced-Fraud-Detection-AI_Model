@@ -247,7 +247,8 @@ const Dashboard = () => {
                               tickPadding: 5,
                               tickRotation: -90,
                               legend: 'Hour of Day',
-                              legendOffset: 46
+                              legendOffset: 46,
+                              format: value => `${value}:00`
                             }}
                             axisRight={null}
                             axisBottom={{
@@ -255,7 +256,8 @@ const Dashboard = () => {
                               tickPadding: 5,
                               tickRotation: -90,
                               legend: 'Hour of Day',
-                              legendOffset: 46
+                              legendOffset: 46,
+                              format: value => `${value}:00`
                             }}
                             axisLeft={{
                               tickSize: 5,
@@ -263,7 +265,8 @@ const Dashboard = () => {
                               tickRotation: 0,
                               legend: 'Day of Week',
                               legendPosition: 'middle',
-                              legendOffset: -72
+                              legendOffset: -72,
+                              format: value => weekDays[value]
                             }}
                             colors={{
                               type: 'sequential',
@@ -287,7 +290,7 @@ const Dashboard = () => {
                                   color: '#4a5568'
                                 }}
                               >
-                                <strong>{cell.serieId}</strong> at <strong>{cell.data.x}:00</strong>
+                                <strong>{weekDays[cell.data.y]}</strong> at <strong>{cell.data.x}:00</strong>
                                 <br />
                                 <span>Fraud Count: {cell.data.value}</span>
                               </div>

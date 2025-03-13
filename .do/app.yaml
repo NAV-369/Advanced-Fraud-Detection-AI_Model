@@ -1,0 +1,25 @@
+name: fraud-detection
+services:
+  - name: web
+    dockerfile_path: fraud-dashboard/Dockerfile
+    source_dir: .
+    github:
+      branch: main
+      deploy_on_push: true
+    health_check:
+      http_path: /
+    http_port: 80
+    instance_count: 1
+    instance_size_slug: basic-xxs
+
+  - name: api
+    dockerfile_path: api/Dockerfile
+    source_dir: .
+    github:
+      branch: main
+      deploy_on_push: true
+    health_check:
+      http_path: /api/health
+    http_port: 5000
+    instance_count: 1
+    instance_size_slug: basic-xxs 
