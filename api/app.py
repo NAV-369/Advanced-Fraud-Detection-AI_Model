@@ -9,6 +9,9 @@ from pathlib import Path
 from datetime import datetime, timedelta
 import random  # Only for demo data, remove in production
 import os
+import jwt
+import hashlib
+from functools import wraps
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -16,7 +19,7 @@ CORS(app, resources={
     r"/*": {
         "origins": ["http://localhost:3000", "https://fraud-detection-frontend.onrender.com"],
         "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type"]
+        "allow_headers": ["Content-Type", "Authorization"]
     }
 })
 
@@ -30,6 +33,44 @@ logging.basicConfig(
 # Always use mock predictions in production for demo
 USE_MOCK_PREDICTIONS = True
 
+# Secret key for JWT
+SECRET_KEY = os.environ.get('SECRET_KEY', 'your-secret-key-for-jwt')
+
+# Mock user database (in production, use a real database)
+USERS = {
+    'admin@fraud-detection.com': {
+        'password': hashlib.sha256('admin123'.encode()).hexdigest(),
+        'role': 'admin'
+    },
+    'user@fraud-detection.com': {
+        'password': hashlib.sha256('user123'.encode()).hexdigest(),
+        'role': 'user'
+    }
+}
+
+# JWT token required decorator
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+        auth_header = request.headers.get('Authorization')
+        
+        if auth_header and auth_header.startswith('Bearer '):
+            token = auth_header.split(' ')[1]
+            
+        if not token:
+            return jsonify({'message': 'Token is missing!'}), 401
+            
+        try:
+            data = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+            current_user = data['email']
+        except:
+            return jsonify({'message': 'Token is invalid!'}), 401
+            
+        return f(current_user, *args, **kwargs)
+    
+    return decorated
+
 @app.route('/')
 def home():
     """Home endpoint"""
@@ -39,9 +80,63 @@ def home():
         "endpoints": {
             "health": "/health",
             "metrics": "/metrics",
-            "predict": "/predict"
+            "predict": "/predict",
+            "auth": {
+                "login": "/auth/login",
+                "register": "/auth/register"
+            }
         }
     })
+
+@app.route('/auth/login', methods=['POST'])
+def login():
+    """Login endpoint"""
+    auth = request.json
+    
+    if not auth or not auth.get('email') or not auth.get('password'):
+        return jsonify({'message': 'Could not verify', 'WWW-Authenticate': 'Basic realm="Login required!"'}), 401
+    
+    email = auth.get('email')
+    password = hashlib.sha256(auth.get('password').encode()).hexdigest()
+    
+    if email not in USERS or USERS[email]['password'] != password:
+        return jsonify({'message': 'Invalid credentials'}), 401
+    
+    # Generate JWT token
+    token = jwt.encode({
+        'email': email,
+        'role': USERS[email]['role'],
+        'exp': datetime.utcnow() + timedelta(hours=24)
+    }, SECRET_KEY, algorithm="HS256")
+    
+    return jsonify({
+        'token': token,
+        'user': {
+            'email': email,
+            'role': USERS[email]['role']
+        }
+    })
+
+@app.route('/auth/register', methods=['POST'])
+def register():
+    """Register endpoint (for demo purposes)"""
+    data = request.json
+    
+    if not data or not data.get('email') or not data.get('password'):
+        return jsonify({'message': 'Missing required fields'}), 400
+    
+    email = data.get('email')
+    
+    if email in USERS:
+        return jsonify({'message': 'User already exists'}), 409
+    
+    # Add new user
+    USERS[email] = {
+        'password': hashlib.sha256(data.get('password').encode()).hexdigest(),
+        'role': 'user'  # Default role
+    }
+    
+    return jsonify({'message': 'User created successfully'}), 201
 
 # Load model
 MODEL_PATH = Path('./model/best_model_LightGBM_20250310_193850.joblib')

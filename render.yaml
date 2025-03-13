@@ -21,7 +21,7 @@ services:
     name: fraud-detection-frontend
     env: node
     buildCommand: cd fraud-dashboard && npm install && npm run build
-    staticPublishPath: ./fraud-dashboard/dist
+    staticPublishPath: fraud-dashboard/dist
     envVars:
       - key: NODE_VERSION
         value: 18

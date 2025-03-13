@@ -1,0 +1,11 @@
+services:
+  - type: static
+    name: fraud-detection-frontend
+    env: node
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: NODE_VERSION
+        value: 18
+      - key: NODE_ENV
+        value: production 

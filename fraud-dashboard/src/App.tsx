@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, NavLink, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, NavLink, useLocation, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { 
@@ -14,11 +14,14 @@ import {
   ListItemIcon, 
   ListItemText,
   IconButton,
-  Divider
+  Divider,
+  Button
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import DashboardIcon from '@mui/icons-material/Dashboard';
+import LogoutIcon from '@mui/icons-material/Logout';
 import Dashboard from './pages/Dashboard';
+import Login from './pages/Login';
 
 const drawerWidth = 240;
 
@@ -57,13 +60,49 @@ const theme = createTheme({
   },
 });
 
+// Protected route component
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const token = localStorage.getItem('token');
+  
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return <>{children}</>;
+};
+
 function MainContent() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/login';
+  };
+
+  // Don't show the drawer on login page
+  if (location.pathname === '/login') {
+    return (
+      <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+        </Routes>
+      </Box>
+    );
+  }
 
   const drawer = (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -98,6 +137,25 @@ function MainContent() {
           </ListItemButton>
         </ListItem>
       </List>
+      {user && (
+        <Box sx={{ p: 2 }}>
+          <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>
+            Logged in as:
+          </Typography>
+          <Typography variant="body1" sx={{ mb: 2, fontWeight: 500 }}>
+            {user.email} ({user.role})
+          </Typography>
+          <Button 
+            variant="outlined" 
+            fullWidth 
+            startIcon={<LogoutIcon />}
+            onClick={handleLogout}
+            sx={{ textTransform: 'none' }}
+          >
+            Logout
+          </Button>
+        </Box>
+      )}
     </Box>
   );
 
@@ -171,7 +229,12 @@ function MainContent() {
         }}
       >
         <Routes>
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/" element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/login" element={<Login />} />
         </Routes>
       </Box>
     </Box>
