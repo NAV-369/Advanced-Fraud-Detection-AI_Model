@@ -3,13 +3,18 @@ services:
   - type: web
     name: fraud-detection-api
     env: python
-    buildCommand: cd api && pip install -r requirements.txt
+    buildCommand: |
+      python -m pip install --upgrade pip
+      python -m pip install setuptools wheel
+      cd api && pip install -r requirements.txt
     startCommand: cd api && gunicorn app:app
     envVars:
       - key: PYTHON_VERSION
         value: 3.9.18
       - key: FLASK_ENV
         value: production
+      - key: PYTHONPATH
+        value: ./api
 
   # Frontend Static Site
   - type: static
