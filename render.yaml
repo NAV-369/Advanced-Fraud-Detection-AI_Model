@@ -7,12 +7,16 @@ services:
     plan: free
     rootDir: api
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn serve_model:app
+    startCommand: python -m gunicorn serve_model:app --bind 0.0.0.0:$PORT
     envVars:
       - key: PYTHON_VERSION
         value: 3.9.18
       - key: FLASK_ENV
         value: production
+      - key: PYTHON_MODULE
+        value: serve_model:app
+      - key: PORT
+        value: 10000
     healthCheckPath: /health
 
   # Frontend Static Site
