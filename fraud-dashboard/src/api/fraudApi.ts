@@ -9,10 +9,15 @@ console.log('API Configuration:', {
   API_BASE_URL
 });
 
+// Create axios instance without authentication
+const api = axios.create({
+  baseURL: API_BASE_URL
+});
+
 export const fetchFraudMetrics = async (): Promise<FraudMetrics> => {
   try {
     console.log('Fetching metrics from:', `${API_BASE_URL}/metrics`);
-    const response = await axios.get(`${API_BASE_URL}/metrics`);
+    const response = await api.get(`/metrics`);
     console.log('Metrics API response:', response.data);
     return response.data;
   } catch (error) {
@@ -42,7 +47,7 @@ export const fetchTransactions = async (): Promise<{
 }> => {
   try {
     console.log('Fetching transactions from:', `${API_BASE_URL}/transactions`);
-    const response = await axios.get(`${API_BASE_URL}/transactions`);
+    const response = await api.get(`/transactions`);
     console.log('Transactions API response:', response.data);
     return response.data;
   } catch (error) {
@@ -62,7 +67,7 @@ export const predictFraud = async (features: number[]): Promise<{
 }> => {
   try {
     console.log('Sending prediction request to:', `${API_BASE_URL}/predict`, 'with features:', features);
-    const response = await axios.post(`${API_BASE_URL}/predict`, {
+    const response = await api.post(`/predict`, {
       features
     });
     console.log('Prediction API response:', response.data);
