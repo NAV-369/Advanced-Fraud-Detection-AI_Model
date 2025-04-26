@@ -22,8 +22,8 @@ services:
     region: oregon
     plan: free
     rootDir: fraud-dashboard
-    buildCommand: npm install -g serve && npm install && npm run build
-    startCommand: serve -s dist
+    buildCommand: npm install && npx vite build
+    startCommand: npx serve -s dist
     envVars:
       - key: NODE_VERSION
         value: 18
