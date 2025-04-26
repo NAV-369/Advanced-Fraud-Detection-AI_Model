@@ -21,8 +21,9 @@ services:
     env: node
     region: oregon
     plan: free
-    buildCommand: cd fraud-dashboard && npm install && npm run build
-    startCommand: cd fraud-dashboard && npm run serve
+    rootDir: fraud-dashboard
+    buildCommand: npm install -g serve && npm install && npm run build
+    startCommand: serve -s dist
     envVars:
       - key: NODE_VERSION
         value: 18
