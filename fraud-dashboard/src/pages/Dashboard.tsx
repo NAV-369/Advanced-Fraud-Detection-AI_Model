@@ -7,6 +7,7 @@ import { MetricCard } from '../components/MetricCard';
 import { PredictionForm } from '../components/PredictionForm';
 import { TransactionTable } from '../components/TransactionTable';
 import { fetchFraudMetrics } from '../api/fraudApi';
+import config from '../api/config';
 import { FraudMetrics } from '../types/metrics';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import WarningIcon from '@mui/icons-material/Warning';
@@ -21,6 +22,8 @@ import { BasicTooltip } from '@nivo/tooltip'
 import { timeFormat } from 'd3-time-format'
 import { HeatMapDatum } from '@nivo/heatmap'
 import { SliceTooltipProps } from '@nivo/line'
+
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const formatHour = (hour: number) => `${hour}:00`;
@@ -58,6 +61,7 @@ function a11yProps(index: number) {
 const Dashboard = () => {
   const [metrics, setMetrics] = useState<FraudMetrics | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [tabValue, setTabValue] = useState(0);
   const theme = useTheme();
 
@@ -65,10 +69,14 @@ const Dashboard = () => {
     const loadMetrics = async () => {
       try {
         setLoading(true);
+        setError(null);
+        console.log('Loading metrics for dashboard...');
         const data = await fetchFraudMetrics();
+        console.log('Successfully loaded metrics:', data);
         setMetrics(data);
       } catch (error) {
         console.error('Error fetching metrics:', error);
+        setError(error instanceof Error ? error.message : 'Failed to load dashboard data');
       } finally {
         setLoading(false);
       }
@@ -103,6 +111,53 @@ const Dashboard = () => {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
         <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+        <Paper
+          sx={{
+            p: 4,
+            maxWidth: 600,
+            background: 'white',
+            borderRadius: 2,
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+            textAlign: 'center'
+          }}
+        >
+          <WarningIcon sx={{ fontSize: 60, color: theme.palette.error.main, mb: 2 }} />
+          <Typography variant="h5" gutterBottom sx={{ color: '#1a365d', fontWeight: 600 }}>
+            Dashboard Error
+          </Typography>
+          <Typography variant="body1" sx={{ color: '#4a5568', mb: 3 }}>
+            {error}
+          </Typography>
+          <Typography variant="body2" sx={{ color: '#718096', mb: 3 }}>
+            Please check if the API server is running at {API_BASE_URL || config.API_URL}
+          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <button 
+                onClick={() => window.location.reload()}
+                style={{
+                  padding: '10px 20px',
+                  backgroundColor: theme.palette.primary.main,
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  fontSize: '1rem'
+                }}
+              >
+                Retry
+              </button>
+            </motion.div>
+          </Box>
+        </Paper>
       </Box>
     );
   }
@@ -309,6 +364,23 @@ const Dashboard = () => {
                                 }
                               }
                             }}
+                            legends={[
+                              {
+                                anchor: 'bottom',
+                                translateX: 0,
+                                translateY: 30,
+                                length: 200,
+                                thickness: 10,
+                                direction: 'row',
+                                tickPosition: 'after',
+                                tickSize: 3,
+                                tickSpacing: 4,
+                                tickOverlap: false,
+                                title: 'Fraud Count →',
+                                titleAlign: 'start',
+                                titleOffset: 4
+                              }
+                            ]}
                           />
                         )}
                       </Box>

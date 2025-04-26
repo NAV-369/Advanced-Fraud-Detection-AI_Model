@@ -151,6 +151,36 @@ This project successfully developed an advanced fraud detection system using mac
 7. **Automated Hyperparameter Tuning**:
    - Implement automated hyperparameter optimization for model performance.
 
+## Testing the Application
+
+To run the tests for this application, follow these steps:
+
+1. Make sure you have installed all the dependencies including testing packages:
+   ```
+   pip install -r requirements.txt
+   ```
+
+2. Navigate to the project root directory and run pytest:
+   ```
+   python -m pytest
+   ```
+
+3. For more detailed test output, use:
+   ```
+   python -m pytest -v
+   ```
+
+4. To run a specific test file:
+   ```
+   python -m pytest tests/test_app.py
+   ```
+
+The test suite covers:
+- API endpoints functionality
+- Authentication mechanisms
+- Fraud prediction logic
+- Data validation
+
 ## Project Overview
 
 This project implements an end-to-end fraud detection system with the following components:

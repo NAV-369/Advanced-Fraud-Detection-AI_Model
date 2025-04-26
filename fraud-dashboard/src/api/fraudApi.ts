@@ -1,24 +1,55 @@
 import axios from 'axios';
 import { FraudMetrics } from '../types/metrics';
-import { mockFraudMetrics } from './mockData';
+import config from './config';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === 'true' || false;
+const API_BASE_URL = import.meta.env.VITE_API_URL || config.API_URL;
 
-// Add response time simulation for development
-const simulateDelay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+// Debug log
+console.log('API Configuration:', { 
+  API_BASE_URL
+});
 
 export const fetchFraudMetrics = async (): Promise<FraudMetrics> => {
-  if (USE_MOCK_DATA) {
-    await simulateDelay(1000);
-    return mockFraudMetrics;
-  }
-
   try {
+    console.log('Fetching metrics from:', `${API_BASE_URL}/metrics`);
     const response = await axios.get(`${API_BASE_URL}/metrics`);
+    console.log('Metrics API response:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error fetching fraud metrics:', error);
+    // Throw a more descriptive error
+    if (axios.isAxiosError(error)) {
+      throw new Error(`Metrics API error: ${error.message} [${error.response?.status || 'No status'}]`);
+    }
+    throw error;
+  }
+};
+
+export const fetchTransactions = async (): Promise<{
+  transactions: Array<{
+    id: number;
+    time: number;
+    amount: number;
+    isFraud: boolean;
+    v1: number;
+    v2: number;
+    v3: number;
+    v4: number;
+    v5: number;
+  }>;
+  count: number;
+  using_real_data: boolean;
+}> => {
+  try {
+    console.log('Fetching transactions from:', `${API_BASE_URL}/transactions`);
+    const response = await axios.get(`${API_BASE_URL}/transactions`);
+    console.log('Transactions API response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching transactions:', error);
+    if (axios.isAxiosError(error)) {
+      throw new Error(`Transactions API error: ${error.message} [${error.response?.status || 'No status'}]`);
+    }
     throw error;
   }
 };
@@ -27,54 +58,20 @@ export const predictFraud = async (features: number[]): Promise<{
   fraudProbability: number;
   confidence: number;
   isAlert: boolean;
+  using_mock?: boolean;
 }> => {
-  if (USE_MOCK_DATA) {
-    await simulateDelay(500);
-    
-    // Extract features
-    const [amount, hour, day, customerAge, accountAge] = features;
-    
-    // Calculate risk based on features
-    let riskScore = 0;
-    
-    // Higher amounts increase risk
-    riskScore += Math.min((amount / 1000) * 0.3, 0.3);
-    
-    // Late night hours (22-6) increase risk
-    if (hour >= 22 || hour <= 6) {
-      riskScore += 0.2;
-    }
-    
-    // Weekend transactions slightly riskier
-    if (day >= 5) {
-      riskScore += 0.1;
-    }
-    
-    // Very young or very old accounts are riskier
-    if (accountAge < 30 || accountAge > 3000) {
-      riskScore += 0.15;
-    }
-    
-    // Add some randomness (±10%)
-    riskScore += (Math.random() * 0.2 - 0.1);
-    
-    // Clamp between 0 and 1
-    riskScore = Math.max(0, Math.min(1, riskScore));
-    
-    return {
-      fraudProbability: riskScore,
-      confidence: 0.8 + (Math.random() * 0.15),  // High confidence for mock data
-      isAlert: riskScore > 0.7
-    };
-  }
-
   try {
+    console.log('Sending prediction request to:', `${API_BASE_URL}/predict`, 'with features:', features);
     const response = await axios.post(`${API_BASE_URL}/predict`, {
       features
     });
+    console.log('Prediction API response:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error predicting fraud:', error);
+    if (axios.isAxiosError(error)) {
+      throw new Error(`Prediction API error: ${error.message} [${error.response?.status || 'No status'}]`);
+    }
     throw error;
   }
 }; 

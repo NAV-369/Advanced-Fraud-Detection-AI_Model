@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -24,6 +24,22 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [authMethod, setAuthMethod] = useState<'firebase' | 'custom'>('custom');
   const navigate = useNavigate();
+
+  // Development mode auto-login
+  useEffect(() => {
+    // Skip authentication in development when mocking data
+    if (import.meta.env.DEV && import.meta.env.VITE_USE_MOCK_DATA === 'true') {
+      console.log('DEV MODE: Bypassing authentication');
+      // Set mock user
+      localStorage.setItem('user', JSON.stringify({
+        email: 'dev@example.com',
+        role: 'admin'
+      }));
+      localStorage.setItem('token', 'mock-token-for-development');
+      // Redirect to dashboard
+      navigate('/');
+    }
+  }, [navigate]);
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: 'firebase' | 'custom') => {
     setAuthMethod(newValue);

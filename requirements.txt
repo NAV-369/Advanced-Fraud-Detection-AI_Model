@@ -11,6 +11,9 @@ matplotlib==3.4.3
 seaborn==0.11.2
 tensorflow==2.6.0
 xgboost==1.4.2
+pyjwt==2.1.0
+pytest==7.3.1
+pytest-flask==1.2.0
 
 matplotlib.pyplot 
 seaborn 

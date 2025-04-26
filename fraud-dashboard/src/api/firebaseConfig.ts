@@ -17,5 +17,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
+// Add this for debugging
+console.log('Firebase configuration loaded');
+
 export { auth };
 export default app; 
