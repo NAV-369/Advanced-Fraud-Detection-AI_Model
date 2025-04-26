@@ -146,9 +146,15 @@ def create_app(test_config=None):
         return jsonify({'message': 'User created successfully'}), 201
 
     # Load model
-    MODEL_PATH = Path('../best_model_LightGBM_20250310_193850.joblib')
+    MODEL_PATH = Path('best_model_LightGBM_20250310_193850.joblib')
     if not MODEL_PATH.exists():
-        MODEL_PATH = Path('./best_model_LightGBM_20250310_193850.joblib')
+        MODEL_PATH = Path('./model/best_model_LightGBM_with_time_features.joblib')
+    if not MODEL_PATH.exists():
+        MODEL_PATH = Path('./best_model_LightGBM_20250310_193850.joblib') 
+    if not MODEL_PATH.exists():
+        MODEL_PATH = Path('../best_model_LightGBM_20250310_193850.joblib')
+    if not MODEL_PATH.exists():
+        MODEL_PATH = Path('../notebooks/best_model_LightGBM_with_time_features.joblib')
 
     try:
         app.config['model'] = joblib.load(MODEL_PATH)
@@ -263,11 +269,16 @@ def create_app(test_config=None):
         try:
             # Load real data instead of generating mock data
             try:
-                # First try to load from data directory relative to workspace root
-                data_path = Path('../data/creditcard.csv')
+                # First try to load from deployment sample data directory
+                data_path = Path('../data_deployment/creditcard_sample.csv')
                 if not data_path.exists():
-                    # Then try from current directory
-                    data_path = Path('./data/creditcard.csv')
+                    # Then try from data directory relative to workspace root
+                    data_path = Path('../data/creditcard.csv')
+                    if not data_path.exists():
+                        # Then try from current directory
+                        data_path = Path('./data/creditcard.csv')
+                        if not data_path.exists():
+                            data_path = Path('./data_deployment/creditcard_sample.csv')
                 
                 if data_path.exists():
                     df = pd.read_csv(data_path)
@@ -455,11 +466,16 @@ def create_app(test_config=None):
         try:
             # Load real transaction data
             try:
-                # First try to load from data directory relative to workspace root
-                data_path = Path('../data/creditcard.csv')
+                # First try to load from deployment sample data directory
+                data_path = Path('../data_deployment/creditcard_sample.csv')
                 if not data_path.exists():
-                    # Then try from current directory
-                    data_path = Path('./data/creditcard.csv')
+                    # Then try from data directory relative to workspace root
+                    data_path = Path('../data/creditcard.csv')
+                    if not data_path.exists():
+                        # Then try from current directory
+                        data_path = Path('./data/creditcard.csv')
+                        if not data_path.exists():
+                            data_path = Path('./data_deployment/creditcard_sample.csv')
                 
                 if data_path.exists():
                     df = pd.read_csv(data_path)
