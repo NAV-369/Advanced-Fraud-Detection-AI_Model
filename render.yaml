@@ -6,24 +6,28 @@ services:
     buildCommand: |
       python -m pip install --upgrade pip
       python -m pip install setuptools wheel
-      cd api && pip install -r requirements.txt
-    startCommand: cd api && gunicorn app:app
+      pip install -r api/requirements.txt
+    startCommand: gunicorn -w 4 -b 0.0.0.0:$PORT api.app:app
     envVars:
       - key: PYTHON_VERSION
         value: 3.9.18
       - key: FLASK_ENV
         value: production
       - key: PYTHONPATH
-        value: ./api
+        value: .
+      - key: PORT
+        value: 10000
 
   # Frontend Service (as web instead of static-site)
   - type: web
     name: fraud-detection-frontend
     env: node
     buildCommand: cd fraud-dashboard && npm install && npm run build
-    startCommand: cd fraud-dashboard && npx serve -s dist
+    startCommand: cd fraud-dashboard && npm run serve
     envVars:
       - key: NODE_VERSION
         value: 18
       - key: NODE_ENV
         value: production
+      - key: PORT
+        value: 10001
