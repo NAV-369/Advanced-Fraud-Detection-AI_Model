@@ -15,8 +15,9 @@ services:
       - key: PYTHONPATH
         value: ./api
 
-  - type: static
+  - type: web
     name: fraud-detection-frontend
+    env: static
     buildCommand: cd fraud-dashboard && npm install && npm run build
     staticPublishPath: fraud-dashboard/dist
     envVars:
