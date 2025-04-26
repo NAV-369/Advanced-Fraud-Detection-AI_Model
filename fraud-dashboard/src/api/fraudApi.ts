@@ -2,7 +2,7 @@ import axios from 'axios';
 import { FraudMetrics } from '../types/metrics';
 import config from './config';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || config.API_URL;
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://fraud-detection-api.onrender.com';
 
 // Debug log
 console.log('API Configuration:', { 
@@ -17,8 +17,8 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
-    'Access-Control-Allow-Origin': '*'
-  }
+  },
+  timeout: 15000 // 15 seconds timeout
 });
 
 // Add a response interceptor to handle errors
@@ -45,8 +45,16 @@ export const fetchFraudMetrics = async (): Promise<FraudMetrics> => {
     return response.data;
   } catch (error) {
     console.error('Error fetching fraud metrics:', error);
-    // Throw a more descriptive error
+    // Add more specific error handling
     if (axios.isAxiosError(error)) {
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error('Server responded with error:', error.response.status, error.response.data);
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.error('No response received from server. Request:', error.request);
+      }
       throw new Error(`Metrics API error: ${error.message} [${error.response?.status || 'No status'}]`);
     }
     throw error;

@@ -241,18 +241,48 @@ function MainContent() {
     // Check if API is available
     const checkApiStatus = async () => {
       try {
-        const response = await fetch(import.meta.env.VITE_API_URL || "https://advanced-fraud-detection-ai-model-3.onrender.com", {
+        const apiUrl = import.meta.env.VITE_API_URL || "https://fraud-detection-api.onrender.com";
+        console.log("Checking API status at:", apiUrl);
+        
+        // First try with /health endpoint
+        let response = await fetch(`${apiUrl}/health`, {
           method: 'GET',
-          mode: 'no-cors',
           headers: {
             'Accept': 'application/json',
           },
-          timeout: 5000
+        }).then(res => {
+          if (!res.ok) {
+            throw new Error(`API health check failed with status: ${res.status}`);
+          }
+          return res;
         });
+        
+        console.log("API health check successful");
         setApiAvailable(true);
       } catch (error) {
-        console.error("API is not available:", error);
-        setApiAvailable(false);
+        console.error("API health check failed:", error);
+        
+        // Try root endpoint as fallback
+        try {
+          const apiUrl = import.meta.env.VITE_API_URL || "https://fraud-detection-api.onrender.com";
+          const response = await fetch(apiUrl, {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json',
+            },
+          });
+          
+          if (response.ok) {
+            console.log("API root endpoint successful");
+            setApiAvailable(true);
+          } else {
+            console.error("API root endpoint failed with status:", response.status);
+            setApiAvailable(false);
+          }
+        } catch (fallbackError) {
+          console.error("API root endpoint failed:", fallbackError);
+          setApiAvailable(false);
+        }
       } finally {
         setLoading(false);
       }
