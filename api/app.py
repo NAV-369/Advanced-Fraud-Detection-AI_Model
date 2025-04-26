@@ -22,9 +22,10 @@ def create_app(test_config=None):
     if test_config:
         app.config.update(test_config)
     
+    # Enable CORS for all origins
     CORS(app, resources={
         r"/*": {
-            "origins": ["http://localhost:3000", "http://localhost:5173", "http://localhost:5174", "https://fraud-detection-frontend.onrender.com"],
+            "origins": "*",
             "methods": ["GET", "POST", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization"]
         }
