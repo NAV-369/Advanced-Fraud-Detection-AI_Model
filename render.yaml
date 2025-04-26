@@ -14,18 +14,3 @@ services:
         value: production
       - key: PYTHONPATH
         value: .
-        
-  # Frontend Service
-  - type: web
-    name: fraud-detection-frontend
-    env: node
-    region: oregon
-    plan: free
-    rootDir: fraud-dashboard
-    buildCommand: npm install && npm run build
-    startCommand: npx serve -s dist
-    envVars:
-      - key: NODE_VERSION
-        value: 18
-      - key: NODE_ENV
-        value: production
