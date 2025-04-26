@@ -1,5 +1,4 @@
 services:
-  # Backend API Service
   - type: web
     name: fraud-detection-api
     env: python
@@ -16,14 +15,12 @@ services:
       - key: PYTHONPATH
         value: ./api
 
-  # Frontend Static Site
-  - type: static-site
-    name: fraud-detection-frontend
-    env: node
+staticSites:
+  - name: fraud-detection-frontend
     buildCommand: cd fraud-dashboard && npm install && npm run build
-    staticPublishPath: fraud-dashboard/dist
+    publishPath: fraud-dashboard/dist
     envVars:
       - key: NODE_VERSION
         value: 18
       - key: NODE_ENV
-        value: production 
+        value: production
