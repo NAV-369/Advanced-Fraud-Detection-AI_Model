@@ -3,11 +3,10 @@ services:
   - type: web
     name: fraud-detection-api
     env: python
-    buildCommand: |
-      python -m pip install --upgrade pip
-      python -m pip install setuptools wheel
-      pip install -r api/requirements.txt
-    startCommand: gunicorn -w 4 -b 0.0.0.0:$PORT api.app:app
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: cd api && gunicorn app:app
     envVars:
       - key: PYTHON_VERSION
         value: 3.9.18
@@ -15,19 +14,3 @@ services:
         value: production
       - key: PYTHONPATH
         value: .
-      - key: PORT
-        value: 10000
-
-  # Frontend Service (as web instead of static-site)
-  - type: web
-    name: fraud-detection-frontend
-    env: node
-    buildCommand: cd fraud-dashboard && npm install && npm run build
-    startCommand: cd fraud-dashboard && npm run serve
-    envVars:
-      - key: NODE_VERSION
-        value: 18
-      - key: NODE_ENV
-        value: production
-      - key: PORT
-        value: 10001
