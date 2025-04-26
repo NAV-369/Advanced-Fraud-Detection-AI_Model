@@ -11,8 +11,31 @@ console.log('API Configuration:', {
 
 // Create axios instance without authentication
 const api = axios.create({
-  baseURL: API_BASE_URL
+  baseURL: API_BASE_URL,
+  // Enable CORS credentials and add necessary headers
+  withCredentials: false,
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    'Access-Control-Allow-Origin': '*'
+  }
 });
+
+// Add a response interceptor to handle errors
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error('API Error:', error);
+    if (error.message === 'Network Error') {
+      console.error('Network Error Details:', {
+        url: error.config?.url,
+        method: error.config?.method,
+        baseURL: API_BASE_URL
+      });
+    }
+    return Promise.reject(error);
+  }
+);
 
 export const fetchFraudMetrics = async (): Promise<FraudMetrics> => {
   try {
