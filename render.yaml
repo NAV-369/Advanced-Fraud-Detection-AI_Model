@@ -6,7 +6,7 @@ services:
     region: oregon
     plan: free
     buildCommand: pip install -r api/requirements.txt
-    startCommand: cd api && gunicorn app:app
+    startCommand: gunicorn api.app:app
     envVars:
       - key: PYTHON_VERSION
         value: 3.9.18
@@ -14,3 +14,21 @@ services:
         value: production
       - key: PYTHONPATH
         value: .
+      - key: USE_MOCK_PREDICTIONS
+        value: "false"
+      - key: SECRET_KEY
+        generateValue: true
+
+  # Frontend Service
+  - type: web
+    name: fraud-detection-dashboard
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: cd fraud-dashboard && npm install && npm run build
+    staticPublishPath: "./fraud-dashboard/dist"
+    envVars:
+      - key: VITE_API_URL
+        value: https://fraud-detection-api.onrender.com
+      - key: VITE_USE_MOCK_DATA
+        value: "false"
